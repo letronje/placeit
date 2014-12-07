@@ -22,5 +22,7 @@ module Placeit
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
+
+    config.locations = JSON.parse(File.read(Rails.root.join("public/locations.json")))
   end
 end

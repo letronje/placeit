@@ -1,0 +1,42 @@
+<div id="new_session_container">
+  <%= form_tag do %>
+    <%= label_tag :username, 'Username: '  %>
+    <%= text_field_tag :username %>
+    <%= submit_tag "Play", :id => "play" %>
+  <% end %>
+</div>
+
+<br />
+<br />
+<br />
+
+<div id="clue_container" style="display: none">
+  <h1 class="title"></h1>
+  <h2>Time Left: <span class="counter"></span></h2>
+  <div class="content" style="clear:both">
+    
+  </div>
+</div>
+
+<%= javascript_include_tag "//js.pusher.com/2.2/pusher.min.js", "jquery.serialize-object" , "lodash.compat.min", "play" %>
+
+<script>
+  var g = {};
+
+  g.pusherKey = '<%= Pusher.key %>';
+  g.createSessionPath = '<%= create_session_path %>';
+  g.clueTimeoutPath = '<%= clue_timeout_path %>';
+  g.clueTimeout = 3
+  
+  Pusher.host    = 'localhost';
+  Pusher.ws_port = 8080;
+  Pusher.wss_port = 8080;
+
+  Pusher.log = function(message) {
+    l(message);
+  };
+
+  g.pusher = new Pusher(g.pusherKey, { enabledTransports: ["ws"] });
+</script>
+
+

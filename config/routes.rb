@@ -1,9 +1,12 @@
 Rails.application.routes.draw do
+  get 'play' => 'play#index'
+  post 'session/create' => 'session#create', as: :create_session
+  post 'play/clue-timeout' => 'play#clue_timeout', as: :clue_timeout
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  # root 'welcome#index'
+  #root 'welcome#index'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
