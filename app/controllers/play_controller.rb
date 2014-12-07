@@ -1,8 +1,47 @@
 class PlayController < ApplicationController
+
+  MAX_ATTEMPTS = 3
+  
   def index
     
   end
 
+  def guess
+    location = params[:location]
+    username = params[:username]
+    game_key = params[:game_key]
+    
+    game = Redis::HashKey.new(game_key, :marshal => true)
+
+    Rails.logger.ap([
+                      location,
+                      game['location']
+                    ])
+    
+    if game['location'] == location
+      game['winner'] = username
+      (game['players'] - [username]).each do |uname|
+        Pusher.trigger("user_#{uname}",
+                       'game_complete', {
+                         :winner => username
+                       })
+      end
+      
+      render :json => { :complete => true, :remaining => 0 }
+    else
+      attempt_count_key = 'attempt_count_' + username
+      total_attempts = game.incr(attempt_count_key, 1)
+      
+      if total_attempts > MAX_ATTEMPTS
+        attempts_remaining = -1
+      else
+        attempts_remaining = MAX_ATTEMPTS - total_attempts
+      end
+      
+      render :json => { :remaining => attempts_remaining, :complete => false }
+    end
+  end
+  
   def clue_timeout
     game_key = params[:game_key]
     clue_index = params[:clue_index].to_i

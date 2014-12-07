@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   get 'play' => 'play#index'
   post 'session/create' => 'session#create', as: :create_session
   post 'play/clue-timeout' => 'play#clue_timeout', as: :clue_timeout
+  post 'play/guess' => 'play#guess', as: :guess_location
+  
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

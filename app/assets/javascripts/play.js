@@ -4,15 +4,106 @@ function l(o){
   return console.log(o);
 }
 
+function blockUI(msg, timeout, cb){
+  if(!timeout){
+    timeout = 3600 * 1000;
+  }
+
+  if(!cb){
+    cb = _.noop();
+  }
+  
+  $.blockUI({
+    message: msg,
+    css: { 
+      border: 'none', 
+      padding: '15px', 
+      backgroundColor: '#000', 
+      '-webkit-border-radius': '10px', 
+      '-moz-border-radius': '10px', 
+      opacity: .5, 
+      color: '#fff' 
+    }
+  });
+
+  setTimeout(function() { 
+    $.unblockUI({ 
+      onUnblock: cb
+    }); 
+  }, timeout); 
+}
+
+function unblockUI(){
+  $.unblockUI();
+}
+
 function startPlaying(username, game_data){
   g.game = game_data;
   g.game.clueIndex = 0;
   
   var opponent = _.difference(g.game.players, [g.username])[0];
-  l("You are up against " + opponent);
-  renderClue();
-  userChannel().bind('clue_complete', function(data) {
-    handleClueComplete(data.next);
+  blockUI("You are up against " + opponent, 2000, function(){
+    setupLocationGuessing();
+    
+    renderClue();
+
+    userChannel().bind('clue_complete', function(data) {
+      handleClueComplete(data.next);
+    });
+
+    userChannel().bind('game_complete', function(data) {
+      if(data.winner != g.username){
+        blockUI("The opponent won", 2000);
+      }
+    });
+  });
+}
+
+function setupLocationGuessing(){
+  var options = _.map(g.game.locations, function(location_name){
+    return({
+      id: location_name,
+      text: location_name
+    });
+  });
+
+  $("#locations").select2({data: options, placeholder: "Select Country", allowClear: false});
+
+  $("#guess_location").click(function(){
+    if(g.guesses_remaining <= 0){
+      blockUI("You have exhaused all your chances.", 1000);
+      return;
+    }
+    
+    var guess = $("#locations").select2("val");
+
+    if(_.isEmpty(guess)){
+      return;
+    }
+    
+    var postData = {
+      game_key: g.game.key,
+      username: g.username,
+      location: guess
+    };
+    
+    $.post(g.guessLocationPath, postData, function(data){
+      l(data);
+
+      if(data.complete){
+        blockUI("That was the correct guess, you won!!", 2000);
+      }
+      else{
+        g.guesses_remaining = data.remaining;
+        if(g.guesses_remaining < 0){
+          blockUI("You have exhaused all your chances.", 2000);
+        }
+        else{
+          blockUI("That was a wrong guess, you have " + data.remaining + " more chances.", 2000);
+        }
+      }
+    });
+    
   });
 }
 
@@ -91,7 +182,7 @@ function renderAudioClue(clue){
   $("#clue_container .content").html(clue.text);
 }
 
-var imageClueTemplate = _.template("<img src='{{url}}' /><br/><h2>{{text}}</h2>");
+var imageClueTemplate = _.template("<div style='width: 500px; height: 250px;'><img style='width: 100%;' src='{{url}}' /></div><br/><h2>{{text}}</h2>");
 
 function renderImageClue(clue){
   $("#clue_container .content").html(imageClueTemplate(clue));
@@ -127,18 +218,12 @@ $(function(){
         startPlaying(username, data.game);
       }
       else{
-        $.blockUI({message: "Please wait while we find an opponent for you."});
+        blockUI("Please wait while we find an opponent for you.");
         userChannel().bind('game_ready', function(data) {
-          $.unblockUI();
+          unblockUI();
           startPlaying(username, data);
         });
       }
     });
   });
-  
-  
-  
-  
-  
-  
 });

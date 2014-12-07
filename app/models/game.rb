@@ -2,28 +2,46 @@ module Game
   extend self
 
   CLUES = [
+    :landmark,
+    
     :flag,
     :capital,
+    :landmark,
     :currency,
+
+    :city,
+
     :languages,
+    :landmark,
     :peak,
+
+    :landmark,
+
     :anthem,
-    :heads_of_state
+    :landmark,
+    :heads_of_state,
+
+    :city,
   ]
 
-  MIN_CLUES = 5
+  MIN_CLUES = 10
   
   def create(players)
-    locations = Rails.configuration.locations
+    locations = Rails.configuration.locations.
+                select{ |_, info| info["name"].present? }
 
     location_name, clues = pick_location_with_clues(locations)
 
     game_key = ["game", *players.sort].join("_")
     game = Redis::HashKey.new(game_key, :marshal => true)
+
+    Rails.logger.ap locations.values.first.fetch("name")
+    
     game_info = {
       'players' => players,
       'location' => location_name,
-      'clues' => clues
+      'clues' => clues,
+      'locations' => locations.values.map{ |l| l["name"] }
     }
     
     game.bulk_set(game_info)
@@ -42,7 +60,7 @@ module Game
         Rails.logger.ap clues
         next
       else
-        chosen_location = location_name
+        chosen_location = locations[location_name]["name"]
         location_clues = clues
         break
       end
@@ -57,7 +75,7 @@ module Game
     ap "generating clue for #{location_name}"
     CLUES.map do |clue|
       begin
-        clue = send("generate_#{clue}_clue", location).merge(:key => SecureRandom.hex(3))
+        clue = send("generate_#{clue}_clue", location)
 
         Rails.logger.ap clue
         
@@ -72,9 +90,33 @@ module Game
         Rails.logger.ap e.backtrace
         nil
       end
-    end.select{ |clue| clue.keys.size >= 2 }
+    end.select(&:present?).uniq
   end
 
+  def generate_city_clue(location)
+    name, url = location["cities"].select{ |city| 
+      city["name"].present? && city["img_src"].present?
+    }.sample.values_at("name", "img_src")
+
+    {
+      :type => :image,
+      :text => name,
+      :url => url
+    }
+  end
+
+  def generate_landmark_clue(location)
+    name, url = location["landmarks"].select{ |landmark| 
+      landmark["name"].present? && landmark["img_src"].present?
+    }.sample.values_at("name", "img_src")
+
+    {
+      :type => :image,
+      :text => name,
+      :url => url
+    }
+  end
+  
   def generate_flag_clue(location)
     url = location["The National Flag"]
     return {} if url.blank?

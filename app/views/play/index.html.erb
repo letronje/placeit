@@ -1,3 +1,5 @@
+<%= stylesheet_link_tag "select2" %>
+
 <div id="new_session_container">
   <%= form_tag do %>
     <%= label_tag :username, 'Username: '  %>
@@ -11,14 +13,20 @@
 <br />
 
 <div id="clue_container" style="display: none">
+  <h2>-- Guess the Country --</h2>
+  <br/>
   <h1 class="title"></h1>
   <h2>Time Left: <span class="counter"></span></h2>
   <div class="content" style="clear:both">
     
   </div>
+  <br />
+  I think you are talking about
+  <input type="hidden" id="locations" style="width: 300px" />
+  <input type="button" value="Confirm" id="guess_location" />
 </div>
 
-<%= javascript_include_tag "//js.pusher.com/2.2/pusher.min.js", "jquery.serialize-object" , "lodash.compat.min", "play" %>
+<%= javascript_include_tag "//js.pusher.com/2.2/pusher.min.js", "jquery.serialize-object" , "lodash.compat.min", "select2.min", "play" %>
 
 <script>
   var g = {};
@@ -26,7 +34,9 @@
   g.pusherKey = '<%= Pusher.key %>';
   g.createSessionPath = '<%= create_session_path %>';
   g.clueTimeoutPath = '<%= clue_timeout_path %>';
-  g.clueTimeout = 3
+  g.guessLocationPath = '<%= guess_location_path %>';
+  
+  g.clueTimeout = 60
   
   Pusher.host    = 'localhost';
   Pusher.ws_port = 8080;

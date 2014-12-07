@@ -38,7 +38,6 @@ gem 'oj_mimic_json'
 gem 'mechanize'
 gem 'nokogiri'
 gem 'rest_client'
-gem 'awesome_print'
 
 # Use Unicorn as the app server
 # gem 'unicorn'
