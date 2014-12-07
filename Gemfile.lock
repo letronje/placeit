@@ -37,6 +37,7 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
     arel (6.0.0)
+    awesome_print (1.2.0)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     builder (3.2.2)
@@ -54,11 +55,16 @@ GEM
     columnize (0.9.0)
     debug_inspector (0.0.2)
     debugger-linecache (1.2.0)
+    domain_name (0.5.22)
+      unf (>= 0.0.5, < 1.0.0)
     erubis (2.7.0)
     execjs (2.2.2)
     globalid (0.3.0)
       activesupport (>= 4.1.0)
     hike (1.2.3)
+    htmlentities (4.3.2)
+    http-cookie (1.0.2)
+      domain_name (~> 0.5)
     i18n (0.7.0.beta1)
     jbuilder (2.2.5)
       activesupport (>= 3.0.0, < 5)
@@ -72,12 +78,27 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
+    mechanize (2.7.3)
+      domain_name (~> 0.5, >= 0.5.1)
+      http-cookie (~> 1.0)
+      mime-types (~> 2.0)
+      net-http-digest_auth (~> 1.1, >= 1.1.1)
+      net-http-persistent (~> 2.5, >= 2.5.2)
+      nokogiri (~> 1.4)
+      ntlm-http (~> 0.1, >= 0.1.1)
+      webrobots (>= 0.0.9, < 0.2)
     mime-types (2.4.3)
     mini_portile (0.6.1)
     minitest (5.4.3)
     multi_json (1.10.1)
+    net-http-digest_auth (1.4)
+    net-http-persistent (2.9.4)
+    netrc (0.7.9)
     nokogiri (1.6.5)
       mini_portile (~> 0.6.0)
+    ntlm-http (0.1.1)
+    oj (2.11.1)
+    oj_mimic_json (1.0.1)
     rack (1.6.0.beta2)
     rack-test (0.6.2)
       rack (>= 1.0)
@@ -108,6 +129,8 @@ GEM
     rake (10.4.2)
     rdoc (4.1.2)
       json (~> 1.4)
+    rest_client (1.8.2)
+      netrc (~> 0.7.7)
     sass (3.2.19)
     sass-rails (4.0.5)
       railties (>= 4.0.0, < 5.0)
@@ -139,21 +162,32 @@ GEM
     uglifier (2.5.3)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.6)
     web-console (2.0.0)
       activemodel (~> 4.0)
       binding_of_caller (>= 0.7.2)
       railties (~> 4.0)
       sprockets-rails (>= 2.0, < 4.0)
+    webrobots (0.1.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  awesome_print
   byebug
   coffee-rails (~> 4.1.0)
+  htmlentities
   jbuilder (~> 2.0)
   jquery-rails
+  mechanize
+  nokogiri
+  oj
+  oj_mimic_json
   rails (= 4.2.0.rc1)
+  rest_client
   sass-rails (~> 4.0)
   sdoc (~> 0.4.0)
   spring

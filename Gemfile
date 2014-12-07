@@ -26,11 +26,19 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-# Use Unicorn as the app server
-# gem 'unicorn'
-
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
+
+gem 'htmlentities'
+gem 'oj'
+gem 'oj_mimic_json'
+gem 'mechanize'
+gem 'nokogiri'
+gem 'rest_client'
+gem 'awesome_print'
+
+# Use Unicorn as the app server
+# gem 'unicorn'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
