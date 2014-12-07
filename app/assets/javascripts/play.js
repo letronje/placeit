@@ -53,6 +53,8 @@ function startPlaying(username, game_data){
 
     userChannel().bind('game_complete', function(data) {
       if(data.winner != g.username){
+        clearTimeout(g.clueTimeoutRef);
+        g.game_completed = true;
         blockUI("The opponent won", 2000);
       }
     });
@@ -70,6 +72,11 @@ function setupLocationGuessing(){
   $("#locations").select2({data: options, placeholder: "Select Country", allowClear: false});
 
   $("#guess_location").click(function(){
+    if(g.game_completed){
+      blockUI("Game Over. Please refresh for a fresh game.", 1000);
+      return;
+    }
+    
     if(g.guesses_remaining <= 0){
       blockUI("You have exhaused all your chances.", 1000);
       return;
@@ -91,6 +98,8 @@ function setupLocationGuessing(){
       l(data);
 
       if(data.complete){
+        clearTimeout(g.clueTimeoutRef);
+        g.game_completed = true;
         blockUI("That was the correct guess, you won!!", 2000);
       }
       else{
@@ -128,7 +137,7 @@ function countDown(total, timeoutFn, n){
   $("#clue_container .counter").html(n);
   
   if(n != 0){
-    setTimeout(function(){
+    g.clueTimeoutRef = setTimeout(function(){
       countDown(total, timeoutFn, n-1);
     }, 1000);
   }
@@ -156,6 +165,7 @@ function renderClue(){
   $("#clue_container").show();
 
   if(g.game.clueIndex >= _.size(g.game.clues)){
+    g.game_completed = true;
     l("We are done");
     return;
   }

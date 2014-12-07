@@ -27,6 +27,9 @@ class PlayController < ApplicationController
                        })
       end
       
+      Rails.logger.ap "clearing game"
+      game.clear
+
       render :json => { :complete => true, :remaining => 0 }
     else
       attempt_count_key = 'attempt_count_' + username
@@ -55,11 +58,17 @@ class PlayController < ApplicationController
 
     if total == game['players'].size
       clue_index = game.incr('clueIndex', 1)
+
       game['players'].each do |uname| 
         Pusher.trigger("user_#{uname}",
                        'clue_complete', {
                          :next => clue_index
                        })
+      end
+
+      if clue_index == game['clues'].size
+        Rails.logger.ap "clearing game"
+        game.clear
       end
     else
       Rails.logger.ap "clue #{clue_index+1} of game #{game['key']} timed out #{total} times"
