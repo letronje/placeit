@@ -25,23 +25,38 @@ module Game
   ]
 
   MIN_CLUES = 10
+
+  class << self
+    attr_accessor :location_clues
+  end
+
+  def all_location_clues
+    all_locations = Rails.configuration.locations
+    all_locations.map do |location_name, info|
+      next if info["name"].blank?
+      
+      clues = clues_for_location(location_name)
+      next if clues.size < MIN_CLUES
+      
+      [info["name"], clues]
+    end.compact
+  end
+
+  def self.location_clues
+    @location_clues ||= all_location_clues
+  end
   
   def create(players)
-    locations = Rails.configuration.locations.
-                select{ |_, info| info["name"].present? }
-
-    location_name, clues = pick_location_with_clues(locations)
+    location_name, clues = self.location_clues.sample
 
     game_key = ["game", *players.sort].join("_")
     game = Redis::HashKey.new(game_key, :marshal => true)
 
-    Rails.logger.ap locations.values.first.fetch("name")
-    
     game_info = {
       'players' => players,
       'location' => location_name,
       'clues' => clues,
-      'locations' => locations.values.map{ |l| l["name"] }
+      'locations' => location_clues.map(&:first)
     }
     
     game.bulk_set(game_info)
@@ -94,7 +109,10 @@ module Game
   end
 
   def generate_city_clue(location)
-    name, url = location["cities"].select{ |city| 
+    cities = location["cities"]
+    return {} if cities.blank?
+    
+    name, url = cities.select{ |city| 
       city["name"].present? && city["img_src"].present?
     }.sample.values_at("name", "img_src")
 
@@ -106,7 +124,10 @@ module Game
   end
 
   def generate_landmark_clue(location)
-    name, url = location["landmarks"].select{ |landmark| 
+    landmarks = location["landmarks"]
+    return {} if landmarks.blank?
+    
+    name, url = landmarks.select{ |landmark| 
       landmark["name"].present? && landmark["img_src"].present?
     }.sample.values_at("name", "img_src")
 
