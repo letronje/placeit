@@ -6,7 +6,7 @@
   
   <%= form_tag do %>
     <%= label_tag :username, 'Username: '  %>
-    <%= text_field_tag :username %>
+    <%= text_field_tag :username, "user_"+SecureRandom.hex(3) %>
     <%= submit_tag "Play", :id => "play" %>
   <% end %>
   
@@ -59,7 +59,7 @@
   
   g.clueTimeout = 10
   
-  Pusher.host    = 'localhost';
+  Pusher.host    = 'letronje.koding.io';
   Pusher.ws_port = 8080;
   Pusher.wss_port = 8080;
 

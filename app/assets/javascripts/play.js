@@ -59,10 +59,15 @@ function startPlaying(username, game_data){
     });
 
     userChannel().bind('game_complete', function(data) {
+      l('game complete');
+      l([data.winner, g.username]);
+	l(data);
       if(data.winner != g.username){
-        clearTimeout(g.clueTimeoutRef);
-        g.game_completed = true;
+        l("showing dialog");  
         blockUI("The opponent won, the country is " + data.location, 5000);
+	clearTimeout(g.clueTimeoutRef);
+        g.game_completed = true;
+        clearInterval(g.pingIntervalRef);   
       }
     });
   });
@@ -81,6 +86,7 @@ function setupLocationGuessing(){
   $("#guess_location").click(function(){
     if(g.game_completed){
       blockUI("Game Over. Please refresh for a fresh game.", 1000);
+      
       return;
     }
     
@@ -107,7 +113,9 @@ function setupLocationGuessing(){
       if(data.complete){
         clearTimeout(g.clueTimeoutRef);
         g.game_completed = true;
+        clearInterval(g.pingIntervalRef);
         blockUI("That was the correct guess, you won!!", 2000);
+        
       }
       else{
         g.guesses_remaining = data.remaining;
@@ -124,6 +132,7 @@ function setupLocationGuessing(){
 }
 
 function handleClueComplete(nextClueIndex){
+  unblockUI();
   g.game.clueIndex = nextClueIndex;
   l("Next clue : " + nextClueIndex);
   renderClue();
@@ -154,6 +163,7 @@ function countDown(total, timeoutFn, n){
 }
 
 function handleClueTimeout(){
+  blockUI("Waiting for opponent ...", 2000);
   $("#clue_container").fadeTo("slow", 0.33);
   var postData = {
     game_key: g.game.key,
@@ -174,7 +184,8 @@ function renderClue(){
 
   if(g.game.clueIndex >= _.size(g.game.clues)){
     g.game_completed = true;
-    blockUI("Game Over", 5000);
+    clearInterval(g.pingIntervalRef);
+    blockUI("Game Over, The Country is " + g.game.location , 5000);
     return;
   }
   

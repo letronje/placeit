@@ -20,7 +20,7 @@ class SessionController < ApplicationController
 
       since = Time.now - opponent_info['last_pinged_at']
       
-      if(since >= 10)
+      if(since >= 5)
         Rails.logger.ap "rejecting opponent #{opponent}, last pinged #{since} seconds ago"
         next
       else
