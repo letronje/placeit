@@ -37,10 +37,17 @@ function unblockUI(){
   $.unblockUI();
 }
 
+function ping(){
+  $.post(g.pingPath, {username: g.username}, function(data){
+    l('got pong');
+    l(data);
+  });
+}
+
 function startPlaying(username, game_data){
   g.game = game_data;
   g.game.clueIndex = 0;
-  
+
   var opponent = _.difference(g.game.players, [g.username])[0];
   blockUI("You are up against " + opponent, 2000, function(){
     setupLocationGuessing();
@@ -55,7 +62,7 @@ function startPlaying(username, game_data){
       if(data.winner != g.username){
         clearTimeout(g.clueTimeoutRef);
         g.game_completed = true;
-        blockUI("The opponent won", 2000);
+        blockUI("The opponent won, the country is " + data.location, 5000);
       }
     });
   });
@@ -147,6 +154,7 @@ function countDown(total, timeoutFn, n){
 }
 
 function handleClueTimeout(){
+  $("#clue_container").fadeTo("slow", 0.33);
   var postData = {
     game_key: g.game.key,
     clue_index: g.game.clueIndex
@@ -162,11 +170,11 @@ function handleClueTimeout(){
 }
 
 function renderClue(){
-  $("#clue_container").show();
+  $("#clue_container").fadeTo("slow", 1.0);
 
   if(g.game.clueIndex >= _.size(g.game.clues)){
     g.game_completed = true;
-    l("We are done");
+    blockUI("Game Over", 5000);
     return;
   }
   
@@ -189,10 +197,11 @@ function renderTextClue(clue){
 }
 
 function renderAudioClue(clue){
-  $("#clue_container .content").html(clue.text);
+  var html = '<audio autoplay="autoplay" controls="controls"><source src="' + clue.url + '" /></audio><br /><h2>' + clue.text + "</h2";
+  $("#clue_container .content").html(html);
 }
 
-var imageClueTemplate = _.template("<div style='width: 500px; height: 250px;'><img style='width: 100%;' src='{{url}}' /></div><br/><h2>{{text}}</h2>");
+var imageClueTemplate = _.template("<div style='width: 500px; height: 250px;'><img style='min-height: 100%; max-width: 100%; max-height: 100%; ' src='{{url}}' /></div><br/><h2>{{text}}</h2>");
 
 function renderImageClue(clue){
   $("#clue_container .content").html(imageClueTemplate(clue));
@@ -209,7 +218,7 @@ function userChannel(){
 }
 
 $(function(){
-
+  $("#new_session_container").fadeIn("slow");
   $("form").submit(function(e){
     e.preventDefault();
 
@@ -221,14 +230,17 @@ $(function(){
     var username = formData.username;
     
     $.post(g.createSessionPath, formData, function(data){
+      
       g.username = username;
 
+      g.pingIntervalRef = setInterval(ping, 1000);
+      
       $("#new_session_container").fadeOut();
       if(data.game_ready){
         startPlaying(username, data.game);
       }
       else{
-        blockUI("Please wait while we find an opponent for you.");
+        blockUI("Please wait while we find an opponent for you ... Or Click <a href='/play' target='_blank' >here</a> to start playing as the opponent.");
         userChannel().bind('game_ready', function(data) {
           unblockUI();
           startPlaying(username, data);

@@ -1,11 +1,21 @@
 <%= stylesheet_link_tag "select2" %>
 
-<div id="new_session_container">
+<div id="new_session_container" style="display: none">
+
+  <h2> Objective: Guess the country based on various clues.</h2>
+  
   <%= form_tag do %>
     <%= label_tag :username, 'Username: '  %>
     <%= text_field_tag :username %>
     <%= submit_tag "Play", :id => "play" %>
   <% end %>
+  
+  <br />
+  Notes:
+  <ul>
+    <li>Mentions of the country in clues will be replaced by underscores </li>
+    <li>You need an opponent to play this game.  </li>
+  </ul>
 </div>
 
 <br />
@@ -36,8 +46,9 @@
   g.createSessionPath = '<%= create_session_path %>';
   g.clueTimeoutPath = '<%= clue_timeout_path %>';
   g.guessLocationPath = '<%= guess_location_path %>';
+  g.pingPath = '<%= ping_path %>';
   
-  g.clueTimeout = 60
+  g.clueTimeout = 10
   
   Pusher.host    = 'localhost';
   Pusher.ws_port = 8080;

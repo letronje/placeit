@@ -6,6 +6,13 @@ class PlayController < ApplicationController
     
   end
 
+  def ping
+    username = params[:username]
+    Game.register_ping(username)
+
+    render :json => { :pong => true }
+  end
+  
   def guess
     location = params[:location]
     username = params[:username]
@@ -23,7 +30,8 @@ class PlayController < ApplicationController
       (game['players'] - [username]).each do |uname|
         Pusher.trigger("user_#{uname}",
                        'game_complete', {
-                         :winner => username
+                         :winner => username,
+                         :location => Rails.configuration.locations[location]["name"].titleize
                        })
       end
       

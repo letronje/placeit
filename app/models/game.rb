@@ -3,25 +3,24 @@ module Game
 
   CLUES = [
     :landmark,
-    
+
     :flag,
-    :capital,
+
+    :peak,
+    
     :landmark,
+
     :currency,
+
+    :languages,
 
     :city,
 
-    :languages,
-    :landmark,
-    :peak,
-
-    :landmark,
-
-    :anthem,
-    :landmark,
     :heads_of_state,
 
     :city,
+
+    :capital
   ]
 
   MIN_CLUES = 10
@@ -30,6 +29,12 @@ module Game
     attr_accessor :location_clues
   end
 
+  def register_ping(username)
+    user_key = "user_#{username}"
+    user = Redis::HashKey.new(user_key, :marshal => true)
+    user['last_pinged_at'] = Time.now
+  end
+  
   def all_location_clues
     all_locations = Rails.configuration.locations
     all_locations.map do |location_name, info|
@@ -118,7 +123,7 @@ module Game
 
     {
       :type => :image,
-      :text => name,
+      :text => "City : " + hide_location_name(name, location),
       :url => url
     }
   end
@@ -133,14 +138,26 @@ module Game
 
     {
       :type => :image,
-      :text => name,
+      :text => "Landmark : " + hide_location_name(name, location),
       :url => url
     }
   end
   
   def generate_flag_clue(location)
-    url = location["The National Flag"]
+    url = location["flag"]
+
+    facts = location["facts"]
+    
+    if facts.present?
+      flag_fact = facts.find{ |fact| fact["name"] =~ /flag/i }
+      if flag_fact.present?
+        url = flag_fact["img_src"]
+      end
+    end
+    
     return {} if url.blank?
+
+    
     {
       :type => :image,
       :text => "The National Flag",
@@ -157,7 +174,7 @@ module Game
     
     {
       :type => :text,
-      :text => text
+      :text => "Heads of State : " + text
     }
   end
 
@@ -172,7 +189,7 @@ module Game
     
     {
       :type => :text,
-      :text => "The Capital is #{name}",
+      :text => "The Capital : #{name}",
     }
   end
 
@@ -196,7 +213,7 @@ module Game
 
     {
       :type => :text,
-      :text => "National Currency is #{currency}",
+      :text => "National Currency : #{currency}",
     }
   end
 
@@ -235,7 +252,7 @@ module Game
     
     {
       :type => :text,
-      :text => text
+      :text => "The Highest Peak: " + text
     }
   end
 
@@ -273,7 +290,7 @@ module Game
     {
       :type => :audio,
       :text => text,
-      :url => url
+      :url => "http://upload.wikimedia.org/wikipedia/commons/6/65/Star_Spangled_Banner_instrumental.ogg"
     }
   end
 end
