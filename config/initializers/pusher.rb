@@ -1,4 +1,4 @@
-Pusher.host   = 'localhost'
+Pusher.host   = 'letronje.koding.io'
 Pusher.port   = 4567
 Pusher.app_id = 'placeit'
 Pusher.key = '2cdd7064b290132617248dbfd85f740e'

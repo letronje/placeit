@@ -25,9 +25,11 @@ module Game
 
   MIN_CLUES = 10
 
-  class << self
-    attr_accessor :location_clues
-  end
+  #class << self
+  #  attr_accessor :location_clues
+  #end
+
+  @@location_clues = nil
 
   def register_ping(username)
     user_key = "user_#{username}"
@@ -47,12 +49,12 @@ module Game
     end.compact
   end
 
-  def self.location_clues
-    @location_clues ||= all_location_clues
+  def location_clues
+    @@location_clues ||= all_location_clues
   end
   
   def create(players)
-    location_name, clues = self.location_clues.sample
+    location_name, clues = location_clues.sample
 
     game_key = ["game", *players.sort].join("_")
     game = Redis::HashKey.new(game_key, :marshal => true)
@@ -91,13 +93,13 @@ module Game
   
   def clues_for_location(location_name)
     location = Rails.configuration.locations.fetch(location_name)
-    ap location
-    ap "generating clue for #{location_name}"
+    #ap location
+    #ap "generating clue for #{location_name}"
     CLUES.map do |clue|
       begin
         clue = send("generate_#{clue}_clue", location)
 
-        Rails.logger.ap clue
+        #Rails.logger.ap clue
         
         clue
       #if clue.values.any?(&:blank?)
@@ -107,7 +109,7 @@ module Game
       rescue => e
         Rails.logger.ap e.message
         Rails.logger.ap e.class
-        Rails.logger.ap e.backtrace
+        #Rails.logger.ap e.backtrace
         nil
       end
     end.select(&:present?).uniq
@@ -258,14 +260,14 @@ module Game
 
   def hide_location_name(text, location)
     regex_str = location["name"].split(/\s+/).map do |w|
-      w[0,4] + "\\w*"
+      w.gsub(/[^\w]+/, "")[0,4] + "\\w*"
     end.join("\\s*")
 
     regex_str = "(\\s+|^)" + regex_str
 
     regex = Regexp.new(regex_str, Regexp::IGNORECASE)
     
-    ap regex
+    #ap regex
 
     text.gsub(regex) do |w| 
       "_" * w.size
