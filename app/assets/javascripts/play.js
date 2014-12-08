@@ -178,10 +178,15 @@ function renderClue(){
     return;
   }
   
+  if(g.game.clueIndex > 0){
+  	var prev_clue = g.game.clues[g.game.clueIndex-1];
+  	l(prev_clue);
+  	window['render' + toTitleCase(prev_clue.type) + 'Clue'](prev_clue, false); 	
+  }
   var clue = g.game.clues[g.game.clueIndex];
 
   renderClueCount();
-  window['render' + toTitleCase(clue.type) + 'Clue'](clue);
+  window['render' + toTitleCase(clue.type) + 'Clue'](clue, true);
 
   setTimeout(function(){
     countDown(g.clueTimeout, handleClueTimeout);
@@ -192,19 +197,32 @@ function renderClueCount(){
   $("#clue_container .title").html("Clue #" + (g.game.clueIndex+1));
 }
 
-function renderTextClue(clue){
-  $("#clue_container .content").html(clue.text);
+function renderTextClue(clue, current){
+	if(current == true){
+  	$("#clue_container .content").html(clue.text);
+  } else {
+  	$("#old_clues .text_clues").append("<li>" + clue.text + "</li>");
+  }
 }
 
-function renderAudioClue(clue){
-  var html = '<audio autoplay="autoplay" controls="controls"><source src="' + clue.url + '" /></audio><br /><h2>' + clue.text + "</h2";
-  $("#clue_container .content").html(html);
+function renderAudioClue(clue, current){
+  if(current == true){
+	  var html = '<audio autoplay="autoplay" controls="controls"><source src="' + clue.url + '" /></audio><br /><h2>' + clue.text + "</h2";
+  	$("#clue_container .content").html(html);
+  } 
 }
 
 var imageClueTemplate = _.template("<div style='width: 500px; height: 250px;'><img style='min-height: 100%; max-width: 100%; max-height: 100%; ' src='{{url}}' /></div><br/><h2>{{text}}</h2>");
 
-function renderImageClue(clue){
-  $("#clue_container .content").html(imageClueTemplate(clue));
+function renderImageClue(clue, current){
+	if(current == true){
+		$("#clue_container .content").html(imageClueTemplate(clue));
+	} else {
+// 		$('.bxslider').bxSlider().destroySlider();
+		$("#old_clues .bxslider").append("<td><img  style='max-width: 20%;' src='" + clue.url + "'/></td>");
+// 		slider = $('.bxslider').bxSlider();
+// 		slider.reloadSlider();
+  }
 }
 
 function userChannel(){
